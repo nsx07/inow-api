@@ -8,7 +8,8 @@ const getUsers = async (context : RouterContext<"/api/v1/getUsers">) => {
     context.response.body = users;
 }
 const createUser = async (context : RouterContext<"/api/v1/createUser">) => {
-    console.log(context.request.body().value)
+    let body = await context.request.body().value;
+    console.log(body);
 
     let email = context.request.url.searchParams.get("email") || ""
     let name = context.request.url.searchParams.get("name") || "";
@@ -22,7 +23,8 @@ const createUser = async (context : RouterContext<"/api/v1/createUser">) => {
 }
 
 const updateUser = async (context : RouterContext<"/api/v1/updateUser">) => {
-    console.log(context.request.body())
+    let body = await context.request.body().value;
+    console.log(body);
 
     let email = context.request.url.searchParams.get("email") || ""
     let name = context.request.url.searchParams.get("name") || "";
