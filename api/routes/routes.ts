@@ -1,5 +1,6 @@
 import { ConvertFileToString } from './../util/ConvertFileToString.ts';
 import { Router } from "https://deno.land/x/oak@v11.1.0/mod.ts"
+import { oakCors, type CorsOptions } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 import {
     createUser,
     getUsers,
@@ -17,14 +18,16 @@ async function getPage(pageName : string) {
             return extractor.content || pageContent;
 }
 
+
+
 router
-    .get("/welcome", async context => {
+    .get("/welcome", oakCors(), async context => {
         context.response.status = 200;
         context.response.body = await getPage("welcome");
     })
-    .get("/api/v1/getUsers", getUsers)
-    .post("/api/v1/createUser", createUser)
-    .put("/api/v1/updateUser", updateUser)
-    .delete("/api/v1/deleteUser", deleteUser);
+    .get("/api/v1/getUsers", oakCors(), getUsers)
+    .post("/api/v1/createUser", oakCors(), createUser)
+    .put("/api/v1/updateUser", oakCors(), updateUser)
+    .delete("/api/v1/deleteUser", oakCors(), deleteUser);
 
 export default router;

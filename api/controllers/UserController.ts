@@ -1,7 +1,11 @@
+import { IUser } from './../models/User.ts';
 import { RouterContext, RouterMiddleware } from "https://deno.land/x/oak@v11.1.0/router.ts";
 import { UserService } from "../services/UserService.ts";
 
 const getUsers = async (context : RouterContext<"/api/v1/getUsers">) => {
+
+    let params = context.request.url.toJSON().split("?")[1].split("&")
+
     const users = await new UserService().getUsers();
     if (users) context.response.status = 200;
     else context.response.status = 404;
@@ -9,17 +13,17 @@ const getUsers = async (context : RouterContext<"/api/v1/getUsers">) => {
 }
 const createUser = async (context : RouterContext<"/api/v1/createUser">) => {
     let body = await context.request.body().value;
-    console.log(body);
+    
+    let newUser : IUser = body
+    
+    console.log(body, newUser);
 
-    let email = context.request.url.searchParams.get("email") || ""
-    let name = context.request.url.searchParams.get("name") || "";
-    let cpf = context.request.url.searchParams.get("cpf") || "";
-
-    const user = new UserService({name, email, cpf});
+    const user = new UserService(newUser);
         await user.createUser();
 
     context.response.status = +user.status;
     context.response.body = user;
+    context.response.headers = new Headers();
 }
 
 const updateUser = async (context : RouterContext<"/api/v1/updateUser">) => {
