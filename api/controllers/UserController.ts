@@ -1,10 +1,12 @@
-import { IUser } from './../models/User.ts';
+import { ILog, IUser } from './../models/User.ts';
 import { RouterContext, RouterMiddleware } from "https://deno.land/x/oak@v11.1.0/router.ts";
 import { UserService } from "../services/UserService.ts";
 
 const getUsers = async (context : RouterContext<"/api/v1/getUsers">) => {
+    // context.response.headers.set('Access-Control-Allow-Origin', '*')
+    // let params = context.request.url.toJSON()
 
-    let params = context.request.url.toJSON().split("?")[1].split("&")
+    // if (params) params.split("?")[1].split("&")
 
     const users = await new UserService().getUsers();
     if (users) context.response.status = 200;
@@ -17,49 +19,61 @@ const createUser = async (context : RouterContext<"/api/v1/createUser">) => {
     let newUser : IUser = body
     
     console.log(body, newUser);
-
+    
     const user = new UserService(newUser);
-        await user.createUser();
-
+    await user.createUser();
+    
     context.response.status = +user.status;
     context.response.body = user;
-    context.response.headers = new Headers();
+    // context.response.headers.set('Access-Control-Allow-Origin', '*')
 }
 
 const updateUser = async (context : RouterContext<"/api/v1/updateUser">) => {
     let body = await context.request.body().value;
     console.log(body);
-
+    
     let email = context.request.url.searchParams.get("email") || ""
     let name = context.request.url.searchParams.get("name") || "";
     let cpf = context.request.url.searchParams.get("cpf") || "";
     let id = context.request.url.searchParams.get("id") || ""
-
+    
     let fields = ["name", "cpf","email"], values = [name, cpf, email]
-
+    
     const user = new UserService();
-        await user.updateUser(+id,fields, values);
-
+    await user.updateUser(+id,fields, values);
+    
     context.response.status = +user.status;
     context.response.body = user.status === "200" ? true : false;
+    // context.response.headers.set('Access-Control-Allow-Origin', '*')
 }
 
 const deleteUser = async (context : RouterContext<"/api/v1/deleteUser">) => {
     let id = context.request.url.searchParams.get("id");
-
+    
     if (id) {
         const user = new UserService()
-            await user.deleteUser(id);
-
-            
+        await user.deleteUser(id);
+        
         context.response.status = +user.status;
         context.response.body = user.status === "200" ? true : false;
-
     } else {
         context.response.body = "Id parameter is missing.";
         context.response.status = 210;
     }
+    // context.response.headers.set('Access-Control-Allow-Origin', '*')
 
 }
 
-export { getUsers, createUser, updateUser, deleteUser}
+const logUser = async (context : RouterContext<"/api/v1/security/log">) => {
+    let body = await context.request.body().value;
+    const log : ILog = body
+
+    const user = new UserService();
+        await user.logUser(log)
+
+        context.response.status = user.isUser ? 200 : 210
+        context.response.body = user.isUser ? user : null
+
+}
+
+export { getUsers, createUser, updateUser, deleteUser, logUser}

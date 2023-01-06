@@ -1,13 +1,36 @@
+import { SecurityStorage } from "../util/security.ts"
+
 export interface IUser {
     name : string,
+    lastname : string
     email : string,
-    cpf : string
+    password : string,
+    cpf : string,
+    phone : string
+
 }
 
-export class User implements IUser {
-    name! : string;
-    email!: string;
-    cpf! : string
+export interface ILog {
+    email : string,
+    password : string
+}
+
+export class User {
+    
+    user! : IUser;
+    security! : string;
+    keySecurity! : number;
+
+    /**
+     *
+     */
+    constructor(user : IUser) {
+        const security = new SecurityStorage();
+
+        this.user = user;
+        this.security = security.encrypt(user.password);
+        this.keySecurity = security.key;
+    }
 }
 
 export abstract class crudUser {

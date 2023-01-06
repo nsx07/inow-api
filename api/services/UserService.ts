@@ -1,19 +1,18 @@
+import { SecurityStorage } from './../util/security.ts';
+import { ILog, User } from './../models/User.ts';
 import { crudUser, IUser } from "../models/User.ts";
 import { client } from "../util/databaseService.ts";
 
 export class UserService extends crudUser {
 
     status! : string;
+    isUser! : boolean;
     users! : IUser[]
     user! : IUser ;
 
     constructor(user? : IUser) {
         super();
-        if (user) this.user = {
-                    name : user.name,
-                    cpf : user.cpf,
-                    email : user.email
-                }
+        if (user) this.user = user
         
         return this
     }
@@ -32,14 +31,18 @@ export class UserService extends crudUser {
 
     async createUser(): Promise<any> {
         if (this.user) {
-            let query = `INSERT INTO user (NAME, CPF, EMAIL) VALUES ('${this.user.name}', '${this.user.cpf}', '${this.user.email}')`;
-            console.debug(query);
+            let query = `INSERT INTO user (NAME, LASTNAME, CPF, EMAIL, PHONE) VALUES ('${this.user.name}', '${this.user.lastname}', '${this.user.cpf}', '${this.user.email}', ${this.user.phone})`;
+            const user = new User(this.user)
+                        
+            console.debug(query, user);
 
             try {
                 await client.execute(query)
-                .then(result => {
-                    this.status = "200"
-                    return result
+                .then(async result => {
+                    const queryToPass = `INSERT INTO SECURITY (U_ID, SECRET, SECRET_KEY) VALUES ('${result.lastInsertId}', '${user.security}', '${user.keySecurity}')`
+                    await client.execute(queryToPass).then( result => {
+                        this.status = "200"
+                    })
                 })
             } catch (error) {
                 console.error(`DATABASE ERROR :${error}`);
@@ -82,6 +85,26 @@ export class UserService extends crudUser {
         } catch (error) {
             console.error(`DATABASE ERROR :${error}`);
         } 
-    }    
+    } 
+
+    async logUser(log : ILog) : Promise<any> {
+        const security = new SecurityStorage();
+        
+        const query = `
+            SELECT U.EMAIL, S.SECRET, S.SECRET_KEY FROM USER AS U, SECURITY AS S 
+             WHERE U.EMAIL = '${log.email}' and s.u_id = u.id
+            `
+            console.warn(query)
+        await client.execute(query).then(
+            result => {
+                if (result.rows) {
+                    console.log(result.rows)
+                    const rows = result.rows
+                    const checkPass = rows.find(user => security.decrypt(user.SECRET, user.SECRET_KEY) == log.password);
+                    this.isUser = checkPass ? true : false
+                } else this.isUser = false
+            }
+        )
+    }
 
 }
