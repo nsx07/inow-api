@@ -5,10 +5,10 @@ import { client } from "../util/databaseService.ts";
 
 export class UserService extends crudUser {
 
-    status! : string;
-    isUser! : boolean;
+    status! : string | number;
     users! : IUser[]
     user! : IUser ;
+    log : ILog = {}
 
     constructor(user? : IUser) {
         super();
@@ -17,7 +17,7 @@ export class UserService extends crudUser {
         return this
     }
 
-    get users_() {
+    get users_() : IUser[] {
         return this.users;
     }
 
@@ -101,10 +101,13 @@ export class UserService extends crudUser {
                     console.log(result.rows)
                     const rows = result.rows
                     const checkPass = rows.find(user => security.decrypt(user.SECRET, user.SECRET_KEY) == log.password);
-                    this.isUser = checkPass ? true : false
-                } else this.isUser = false
+                    this.status = checkPass ? 200 : 210
+                }
             }
-        )
+        ).finally(() => {
+            this.log.email = this.status != null ? true : false
+            this.log.password = this.status === 200 ? true : false
+        })
     }
 
 }

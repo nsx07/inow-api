@@ -11,8 +11,8 @@ export interface IUser {
 }
 
 export interface ILog {
-    email : string,
-    password : string
+    email? : string | boolean,
+    password? : string | boolean
 }
 
 export class User {
