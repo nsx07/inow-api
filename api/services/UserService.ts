@@ -13,19 +13,22 @@ export class UserService extends crudUser {
     constructor(user? : IUser) {
         super();
         if (user) this.user = user
+        // const checkConnection = setInterval(async _ => {
+        //     if (this.status !== undefined) {
+        //         await client.close();
+        //         clearInterval(checkConnection);
+        //     }
+        // },150);
         
         return this
-    }
-
-    get users_() {
-        return this.users;
     }
 
     async getUsers() : Promise<any> {        
         const query = "SELECT * FROM USER";
         console.log(query)
 
-        await client.execute(query).then((_users : any) => this.users = _users.rows);
+        await client.execute(query)
+            .then((_users : any) => this.users = _users.rows);
         return this
     }
 
@@ -34,7 +37,7 @@ export class UserService extends crudUser {
             let query = `INSERT INTO user (NAME, LASTNAME, CPF, EMAIL, PHONE) VALUES ('${this.user.name}', '${this.user.lastname}', '${this.user.cpf}', '${this.user.email}', ${this.user.phone})`;
             const user = new User(this.user)
                         
-            console.debug(query, user);
+            console.debug(query);
 
             try {
                 await client.execute(query)
@@ -88,21 +91,19 @@ export class UserService extends crudUser {
     } 
 
     async logUser(log : ILog) : Promise<any> {
-        const security = new SecurityStorage();
-        
+        const security = new SecurityStorage();   
         const query = `
             SELECT U.EMAIL, S.SECRET, S.SECRET_KEY FROM USER AS U, SECURITY AS S 
-             WHERE U.EMAIL = '${log.email}' and s.u_id = u.id
-            `
+             WHERE U.EMAIL = '${log.email}' and s.u_id = u.id`
             console.warn(query)
         await client.execute(query).then(
             result => {
                 if (result.rows) {
-                    console.log(result.rows)
                     const rows = result.rows
                     const checkPass = rows.find(user => security.decrypt(user.SECRET, user.SECRET_KEY) == log.password);
                     this.isUser = checkPass ? true : false
                 } else this.isUser = false
+                this.status = this.isUser ? "200" : "210";
             }
         )
     }

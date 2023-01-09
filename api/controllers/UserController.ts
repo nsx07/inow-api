@@ -8,11 +8,13 @@ const getUsers = async (context : RouterContext<"/api/v1/getUsers">) => {
 
     // if (params) params.split("?")[1].split("&")
 
-    const users = await new UserService().getUsers();
+    const users = new UserService();
+        await users.getUsers();
     if (users) context.response.status = 200;
     else context.response.status = 404;
     context.response.body = users;
 }
+
 const createUser = async (context : RouterContext<"/api/v1/createUser">) => {
     let body = await context.request.body().value;
     

@@ -1,16 +1,15 @@
-import { Client, ExecuteResult } from "https://deno.land/x/mysql@v2.11.0/mod.ts";
+import { enviroment } from './../config/config.ts';
+import { Client } from "https://deno.land/x/mysql@v2.11.0/mod.ts";
 
-
-const client = await new Client()
-  client
+const client = new Client()
+  await client
     .connect({
-  
-      hostname: "144.22.234.67",
-      port: 22,
-      username: "inow-admin",
-      password : "inow@Adm_2023",
-      poolSize : 5,
-      db: "inow",
+      poolSize : enviroment.defaultPoolSize,
+      username : enviroment.defaultUserdb,
+      idleTimeout : enviroment.timeout,
+      hostname : enviroment.hostDb,
+      db : enviroment.defaultDb,
+      port : enviroment.portDb,
     });
 
 export { client }
