@@ -1,4 +1,4 @@
-import { ILog, IUser } from './../models/User.ts';
+import { ILog, IUser, User } from './../models/User.ts';
 import { RouterContext, RouterMiddleware } from "https://deno.land/x/oak@v11.1.0/router.ts";
 import { UserService } from "../services/UserService.ts";
 
@@ -17,17 +17,16 @@ const getUsers = async (context : RouterContext<"/api/v1/getUsers">) => {
 
 const createUser = async (context : RouterContext<"/api/v1/createUser">) => {
     let body = await context.request.body().value;
+
     
+
     let newUser : IUser = body
-    
-    console.log(body, newUser);
     
     const user = new UserService(newUser);
     await user.createUser();
     
     context.response.status = +user.status;
     context.response.body = user;
-    // context.response.headers.set('Access-Control-Allow-Origin', '*')
 }
 
 const updateUser = async (context : RouterContext<"/api/v1/updateUser">) => {
@@ -46,7 +45,6 @@ const updateUser = async (context : RouterContext<"/api/v1/updateUser">) => {
     
     context.response.status = +user.status;
     context.response.body = user.status === "200" ? true : false;
-    // context.response.headers.set('Access-Control-Allow-Origin', '*')
 }
 
 const deleteUser = async (context : RouterContext<"/api/v1/deleteUser">) => {
@@ -62,7 +60,6 @@ const deleteUser = async (context : RouterContext<"/api/v1/deleteUser">) => {
         context.response.body = "Id parameter is missing.";
         context.response.status = 210;
     }
-    // context.response.headers.set('Access-Control-Allow-Origin', '*')
 
 }
 
@@ -73,8 +70,11 @@ const logUser = async (context : RouterContext<"/api/v1/security/log">) => {
     const user = new UserService();
         await user.logUser(log)
 
-        context.response.status = user.isUser ? 200 : 210
-        context.response.body = user.isUser ? user : null
+        context.response.status = +user.status
+        context.response.body = {
+            email : user.log.email,
+            password : user.log.password
+        }
 
 }
 
