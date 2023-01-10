@@ -1,7 +1,6 @@
 import { enviroment } from './../config/config.ts';
 import { Client } from "https://deno.land/x/mysql@v2.11.0/mod.ts";
 
-<<<<<<< HEAD
 const client = new Client()
   await client
     .connect({
@@ -11,19 +10,8 @@ const client = new Client()
       hostname : enviroment.hostDb,
       db : enviroment.defaultDb,
       port : enviroment.portDb,
-=======
+    })
 
-const client = new Client()
-  await client
-    .connect({
-  
-      hostname: "127.0.0.1",
-      port: 3306,
-      username: "root",
-      poolSize : 5,
-      db: "inow",
->>>>>>> 06613f66b2483dc7ee1dc6b3db1a9d72a90587ed
-    });
 
 const utilDataBaseAction = {
   initDb : async () => {

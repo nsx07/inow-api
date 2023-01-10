@@ -7,29 +7,21 @@ export class UserService extends crudUser {
 
     status! : string | number;
     users! : IUser[]
-    user! : IUser ;
+    user! : IUser;
     log : ILog = {}
 
     constructor(user? : IUser) {
         super();
         if (user) this.user = user
-        // const checkConnection = setInterval(async _ => {
-        //     if (this.status !== undefined) {
-        //         await client.close();
-        //         clearInterval(checkConnection);
-        //     }
-        // },150);
+
         
         return this
     }
 
-<<<<<<< HEAD
-=======
     get users_() : IUser[] {
         return this.users;
     }
 
->>>>>>> 06613f66b2483dc7ee1dc6b3db1a9d72a90587ed
     async getUsers() : Promise<any> {        
         const query = "SELECT * FROM USER";
         console.log(query)
@@ -48,9 +40,9 @@ export class UserService extends crudUser {
 
             try {
                 await client.execute(query)
-                .then(async result => {
+                .then(async (result : any) => {
                     const queryToPass = `INSERT INTO SECURITY (U_ID, SECRET, SECRET_KEY) VALUES ('${result.lastInsertId}', '${user.security}', '${user.keySecurity}')`
-                    await client.execute(queryToPass).then( result => {
+                    await client.execute(queryToPass).then( (result : any)=> {
                         this.status = "200"
                     })
                 })
@@ -99,28 +91,23 @@ export class UserService extends crudUser {
 
     async logUser(log : ILog) : Promise<any> {
         const security = new SecurityStorage();   
-        const query = `
-            SELECT U.EMAIL, S.SECRET, S.SECRET_KEY FROM USER AS U, SECURITY AS S 
-             WHERE U.EMAIL = '${log.email}' and s.u_id = u.id`
-            console.warn(query)
-        await client.execute(query).then(
-            result => {
-                if (result.rows) {
+        const query = `SELECT U.EMAIL, S.SECRET, S.SECRET_KEY FROM USER AS U, SECURITY AS S WHERE U.EMAIL = '${log.email}' and s.u_id = u.id`;
+        console.log(query);
+
+        await client.execute(query)
+            .then(result => {
+                this.status = 200
+                if (result.rows?.length) {
+                    this.log.email = true;
                     const rows = result.rows
                     const checkPass = rows.find(user => security.decrypt(user.SECRET, user.SECRET_KEY) == log.password);
-<<<<<<< HEAD
-                    this.isUser = checkPass ? true : false
-                } else this.isUser = false
-                this.status = this.isUser ? "200" : "210";
-=======
-                    this.status = checkPass ? 200 : 210
+                    this.log.password = checkPass ? true : false;
+                } else {
+                    this.log.email = false
+
                 }
->>>>>>> 06613f66b2483dc7ee1dc6b3db1a9d72a90587ed
-            }
-        ).finally(() => {
-            this.log.email = this.status != null ? true : false
-            this.log.password = this.status === 200 ? true : false
-        })
+            })
+
     }
 
 }
