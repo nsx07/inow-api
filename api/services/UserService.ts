@@ -36,7 +36,7 @@ export class UserService extends crudUser {
             let query = `INSERT INTO user (NAME, LASTNAME, CPF, EMAIL, PHONE) VALUES ('${this.user.name}', '${this.user.lastname}', '${this.user.cpf}', '${this.user.email}', ${this.user.phone})`;
             const user = new User(this.user)
                         
-            console.debug(query);
+            console.debug(query, this.user);
 
             try {
                 await client.execute(query)
@@ -44,10 +44,13 @@ export class UserService extends crudUser {
                     const queryToPass = `INSERT INTO SECURITY (U_ID, SECRET, SECRET_KEY) VALUES ('${result.lastInsertId}', '${user.security}', '${user.keySecurity}')`
                     await client.execute(queryToPass).then( (result : any)=> {
                         this.status = "200"
+                        return this.user
                     })
                 })
             } catch (error) {
                 console.error(`DATABASE ERROR :${error}`);
+                this.status = 500
+                return error
             }
         } else return "User not valid";
     }
@@ -100,6 +103,7 @@ export class UserService extends crudUser {
                 if (result.rows?.length) {
                     this.log.email = true;
                     const rows = result.rows
+                    console.log(rows)
                     const checkPass = rows.find(user => security.decrypt(user.SECRET, user.SECRET_KEY) == log.password);
                     this.log.password = checkPass ? true : false;
                 } else {

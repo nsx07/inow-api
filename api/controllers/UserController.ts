@@ -23,10 +23,10 @@ const createUser = async (context : RouterContext<"/api/v1/createUser">) => {
     let newUser : IUser = body
     
     const user = new UserService(newUser);
-    await user.createUser();
+    const result = await user.createUser();
     
     context.response.status = +user.status;
-    context.response.body = user;
+    context.response.body = result;
 }
 
 const updateUser = async (context : RouterContext<"/api/v1/updateUser">) => {
