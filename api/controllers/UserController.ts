@@ -78,4 +78,4 @@ const logUser = async (context : RouterContext<"/api/v1/security/log">) => {
 
 }
 
-export { getUsers, createUser, updateUser, deleteUser, logUser}
+export { getUsers, createUser, updateUser, deleteUser, logUser }

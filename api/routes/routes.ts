@@ -6,8 +6,9 @@ import {
     getUsers,
     updateUser,
     deleteUser,
-logUser
+logUser,
  } from "../controllers/UserController.ts"
+import { getInfo } from "../controllers/GenericController.ts";
 
 const router = new Router();
 const pagesPath = "./pages/"
@@ -25,12 +26,20 @@ router
         context.response.body = await getPage("welcome");
     })
     .get("/api/v1/getUsers", getUsers)
+
+    .options("/api/v1/internal/getInfo", oakCors(), getInfo)
+    .get("/api/v1/internal/getInfo", oakCors(), getInfo)
+    .post("/api/v1/internal/getInfo", oakCors(), getInfo)
+
     .options("/api/v1/createUser", oakCors(), createUser)
     .post("/api/v1/createUser", oakCors(), createUser)
+
     .options("/api/v1/security/log", oakCors(), logUser)
     .post("/api/v1/security/log", oakCors(), logUser)
+    
     .options("/api/v1/updateUser", oakCors(), updateUser)
     .put("/api/v1/updateUser", oakCors(), updateUser)
+    
     .options("/api/v1/deleteUser", oakCors(), deleteUser)
     .delete("/api/v1/deleteUser", oakCors(), deleteUser);
 

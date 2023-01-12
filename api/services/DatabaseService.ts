@@ -12,7 +12,6 @@ const client = new Client()
       port : enviroment.portDb,
     })
 
-
 const utilDataBaseAction = {
   initDb : async () => {
     await client
@@ -25,8 +24,6 @@ const utilDataBaseAction = {
           EMAIL VARCHAR(35) NOT NULL,
           PHONE VARCHAR(15) NOT NULL
           )`)
-          .then(response => console.log(response))
-          .catch(error  => console.error(error));
     
     await client
       .execute(
@@ -38,12 +35,8 @@ const utilDataBaseAction = {
   
           FOREIGN KEY (U_ID) REFERENCES USER(ID)
           )`)
-          .then(response => console.log(response))
-          .catch(error  => console.error(error));
 
   }
 }
-
-utilDataBaseAction.initDb().then(resp => console.info(resp))
 
 export { client, utilDataBaseAction }

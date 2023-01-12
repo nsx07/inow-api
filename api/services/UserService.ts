@@ -1,7 +1,7 @@
-import { SecurityStorage } from './../util/security.ts';
+import { SecurityStorage } from './../util/Security.ts';
 import { ILog, User } from './../models/User.ts';
 import { crudUser, IUser } from "../models/User.ts";
-import { client } from "../util/databaseService.ts";
+import { client } from "./databaseService.ts";
 
 export class UserService extends crudUser {
 
@@ -101,9 +101,8 @@ export class UserService extends crudUser {
             .then(result => {
                 this.status = 200
                 if (result.rows?.length) {
-                    this.log.email = true;
+                    this.log.email = log.email;
                     const rows = result.rows
-                    console.log(rows)
                     const checkPass = rows.find(user => security.decrypt(user.SECRET, user.SECRET_KEY) == log.password);
                     this.log.password = checkPass ? true : false;
                 } else {
