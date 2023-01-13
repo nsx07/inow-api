@@ -1,6 +1,5 @@
 import { QueryMapper } from './../util/QueryMapper.ts';
 import { IQueryEntity } from "../models/Query.ts";
-import { client } from "./DatabaseService.ts"
 
 export class GenericService {
     
@@ -12,14 +11,14 @@ export class GenericService {
     }
 
     async getInfo (requestQuery : IQueryEntity) {
-        console.debug(requestQuery)
+        // console.debug(requestQuery)
         
-        const query = new QueryMapper(requestQuery)
-            // query.assembleQuery();
-        console.debug(
-            query.assembleQuery()
-            )
+        // const query = new QueryMapper(requestQuery)
+        //     // query.assembleQuery();
+        // console.debug(
+        //     query.assembleQuery()
+        //     )
 
-        await client.execute(query.assembleQuery()).then(result => this.body = result.rows); 
+        // await client.execute(query.assembleQuery()).then(result => this.body = result.rows); 
     }
 }

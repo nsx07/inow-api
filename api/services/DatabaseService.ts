@@ -1,42 +1,20 @@
 import { enviroment } from './../config/config.ts';
-import { Client } from "https://deno.land/x/mysql@v2.11.0/mod.ts";
+import { Database, MySQLConnector } from "https://deno.land/x/denodb@v1.2.0/mod.ts";
+import { User } from '../models/Entities.ts';
 
-const client = new Client()
-  await client
-    .connect({
-      poolSize : enviroment.defaultPoolSize,
-      username : enviroment.defaultUserdb,
-      idleTimeout : enviroment.timeout,
-      hostname : enviroment.hostDb,
-      db : enviroment.defaultDb,
-      port : enviroment.portDb,
-    })
+const connector = new MySQLConnector({
+  username : enviroment.defaultUserdb??"root",
+  database : enviroment.defaultDb??"inow",
+  host : enviroment.hostDb??"127.0.0.1",
+  port : enviroment.portDb??"3306",
+  password : enviroment.password 
+});
 
-const utilDataBaseAction = {
-  initDb : async () => {
-    await client
-      .execute(
-        ` CREATE TABLE IF NOT EXISTS USER (
-          ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-          NAME VARCHAR(30) NOT NULL,
-          LASTNAME VARCHAR(75) NOT NULL,
-          CPF CHAR(11) NOT NULL UNIQUE,
-          EMAIL VARCHAR(35) NOT NULL,
-          PHONE VARCHAR(15) NOT NULL
-          )`)
-    
-    await client
-      .execute(
-        ` CREATE TABLE IF NOT EXISTS SECURITY (
-          ID INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-          U_ID INT NOT NULL,
-          SECRET VARCHAR(18) NOT NULL,
-          SECRET_KEY INT NOT NULL,
-  
-          FOREIGN KEY (U_ID) REFERENCES USER(ID)
-          )`)
+const dataBase = new Database(connector)
 
-  }
+const initDb = () => {
+  dataBase.link([User])
+  // dataBase.sync()
 }
-
-export { client, utilDataBaseAction }
+  
+export { dataBase, initDb }

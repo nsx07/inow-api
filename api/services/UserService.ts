@@ -1,116 +1,87 @@
 import { SecurityStorage } from './../util/Security.ts';
-import { ILog, User } from './../models/User.ts';
-import { crudUser, IUser } from "../models/User.ts";
-import { client } from "./databaseService.ts";
+import { ILog, UserTool } from './../models/User.ts';
+import { IUser } from "../models/User.ts";
+import { dataBase } from "./DatabaseService.ts";
+import { User } from "../models/Entities.ts";
+import { Values } from 'https://deno.land/x/denodb@v1.2.0/lib/data-types.ts';
 
-export class UserService extends crudUser {
+export class UserService {
 
-    status! : string | number;
+    status! : number;
     users! : IUser[]
     user! : IUser;
     log : ILog = {}
 
-    constructor(user? : IUser) {
-        super();
-        if (user) this.user = user
-
-        
+    constructor() {
         return this
     }
 
-    get users_() : IUser[] {
-        return this.users;
+    async getUsers() : Promise<any> {      
+        return await User.all()
+            .then((result) => {
+                this.status = 200
+                return result
+            })
+            .catch((err) => {
+                this.status = 300
+                return err
+            });
     }
 
-    async getUsers() : Promise<any> {        
-        const query = "SELECT * FROM USER";
-        console.log(query)
+    async createUser(user : any): Promise<any> {
+        const security = new UserTool(user)
+        user.password = security.security
+        user.secretKey = security.keySecurity
 
-        await client.execute(query)
-            .then((_users : any) => this.users = _users.rows);
-        return this
+        return await User.create([user])
+            .then(result => {
+                this.status = 200
+                return true
+            })
+            .catch(reason => {
+                this.status = 400
+                return false
+            })
+    
     }
 
-    async createUser(): Promise<any> {
-        if (this.user) {
-            let query = `INSERT INTO user (NAME, LASTNAME, CPF, EMAIL, PHONE) VALUES ('${this.user.name}', '${this.user.lastname}', '${this.user.cpf}', '${this.user.email}', ${this.user.phone})`;
-            const user = new User(this.user)
-                        
-            console.debug(query, this.user);
+    async logUser(log : ILog) : Promise<any> {
 
-            try {
-                await client.execute(query)
-                .then(async (result : any) => {
-                    const queryToPass = `INSERT INTO SECURITY (U_ID, SECRET, SECRET_KEY) VALUES ('${result.lastInsertId}', '${user.security}', '${user.keySecurity}')`
-                    await client.execute(queryToPass).then( (result : any)=> {
-                        this.status = "200"
-                        return this.user
-                    })
-                })
-            } catch (error) {
-                console.error(`DATABASE ERROR :${error}`);
-                this.status = 500
-                return error
-            }
-        } else return "User not valid";
+        await User.select("password","secretKey").where("email", log?.email??"").get()
+            .then((result : any) => {
+                if (result.length) {
+                    this.log.email = log.email
+                    this.log.password = false
+                    if (log.password === new SecurityStorage().decrypt(result[0].password, result[0].secretKey)) this.log.password = true
+                    
+                    return
+                } else this.log.email = false
+            }).catch((err) => {
+                console.log(err)
+            });
+            
+
+
     }
 
-    async updateUser(id : number ,fields : string[], values : string[]): Promise<any> {
-        if (fields.length != values.length) return;
-        let fields_ = "";
-        for (let index = 0; index < fields.length; index++) {
-            fields_ += `${fields[index]}='${values[index]}',`
-        }
-        fields_ = fields_.substring(0, fields_.length-1);
-
-        let query = `UPDATE USER SET ${fields_} WHERE USER.ID = ${id}`;
-        console.log(query);
-
-        try {
-            await client.execute(query)
-                .then(result => {
-                    this.status = "200"
-                    return result
-                });
-        } catch (error) {
-            console.error(`DATABASE ERROR :${error}`);
-        }
+    async updateUser(user : any): Promise<any> {
+        return await User.where("id", user.id).update(user)
+            .then((result) => {
+                this.status = 200;
+                return result;
+            }).catch((err) => {
+                this.status = 400;
+                return err;
+            });
     }
 
     async deleteUser(id : number | string): Promise<any> {
-        let query = `DELETE FROM USER WHERE USER.ID = ${id}`
-        console.log(query);
-
-        try {
-            await client.execute(query)
-                .then(result => {
-                    this.status = "200";
-                    return result
-                });
-        } catch (error) {
-            console.error(`DATABASE ERROR :${error}`);
-        } 
+        return await User.deleteById(id)
+            .then((result) => {
+                return true
+            }).catch((err) => {
+                console.warn(err)
+                return false
+            });
     } 
-
-    async logUser(log : ILog) : Promise<any> {
-        const security = new SecurityStorage();   
-        const query = `SELECT U.EMAIL, S.SECRET, S.SECRET_KEY FROM USER AS U, SECURITY AS S WHERE U.EMAIL = '${log.email}' and s.u_id = u.id`;
-        console.log(query);
-
-        await client.execute(query)
-            .then(result => {
-                this.status = 200
-                if (result.rows?.length) {
-                    this.log.email = log.email;
-                    const rows = result.rows
-                    const checkPass = rows.find(user => security.decrypt(user.SECRET, user.SECRET_KEY) == log.password);
-                    this.log.password = checkPass ? true : false;
-                } else {
-                    this.log.email = false
-
-                }
-            })
-
-    }
-
 }

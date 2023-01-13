@@ -6,5 +6,6 @@ export const enviroment = {
     defaultUserdb : "root",
     defaultDb : "inow",
     defaultPoolSize : 3,
-    timeout : 300000000
+    timeout : 300000000,
+    password : ""
 }
