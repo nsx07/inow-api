@@ -1,3 +1,4 @@
+import { Model } from "https://deno.land/x/denodb@v1.2.0/mod.ts";
 import { SecurityStorage } from "../util/Security.ts"
 
 export interface IUser {
@@ -11,7 +12,51 @@ export interface IUser {
     secretKey : number 
 }
 
+export class IUser implements IUser {
+    id! : number;
+    name! : string ;
+    lastname! : string 
+    email! : string ;
+    password! : string ;
+    cpf! : string ;
+    phone! : string 
+    secretKey! : number 
+}
+
+export interface IUserDTO {
+    id : number,
+    name : string,
+    lastName : string,
+    email : string,
+    cpf : string,
+    phone : string
+}
+
+export class IUserDTO extends Model implements IUserDTO{
+
+    constructor(user : any) {
+        super()
+        
+        this.id = user.id;
+        this.name = user.name ;
+        this.lastName = user.lastName 
+        this.email = user.email ;
+        this.cpf = user.cpf ;
+        this.phone = user.phone 
+
+        return this
+    }
+
+    id! : number;
+    name! : string ;
+    lastName! : string 
+    email! : string ;
+    cpf! : string ;
+    phone! : string 
+}
+
 export interface ILog {
+    id? : number | string,
     email? : string | boolean,
     password? : string | boolean
 }

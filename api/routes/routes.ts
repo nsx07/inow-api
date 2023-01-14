@@ -6,7 +6,8 @@ import {
     getUsers,
     updateUser,
     deleteUser,
-logUser,
+    logUser,
+    getUserById
  } from "../controllers/UserController.ts"
 import { getInfo } from "../controllers/GenericController.ts";
 
@@ -26,6 +27,7 @@ router
         context.response.body = await getPage("welcome");
     })
     .get("/api/v1/getUsers", getUsers)
+    .get("/api/v1/getUserById:id", getUserById)
 
     .options("/api/v1/internal/getInfo", oakCors(), getInfo)
     .get("/api/v1/internal/getInfo", oakCors(), getInfo)

@@ -1,34 +1,51 @@
+import { Model } from 'https://deno.land/x/denodb@v1.2.0/mod.ts';
 import { SecurityStorage } from './../util/Security.ts';
-import { ILog, UserTool } from './../models/User.ts';
+import { ILog, IUserDTO, UserTool } from './../models/User.ts';
 import { IUser } from "../models/User.ts";
 import { dataBase } from "./DatabaseService.ts";
 import { User } from "../models/Entities.ts";
-import { Values } from 'https://deno.land/x/denodb@v1.2.0/lib/data-types.ts';
 
 export class UserService {
 
     status! : number;
-    users! : IUser[]
-    user! : IUser;
     log : ILog = {}
 
     constructor() {
         return this
     }
 
-    async getUsers() : Promise<any> {      
-        return await User.all()
-            .then((result) => {
+    async getUserById(id : number) : Promise<IUserDTO> {
+        
+        return await User.select().where("id", id).get()
+            .then((result : any) => {
                 this.status = 200
-                return result
+                const pipe : IUserDTO = new IUserDTO(result[0])
+                return pipe
             })
             .catch((err) => {
                 this.status = 300
                 return err
-            });
+            })
+            .finally(() => dataBase.close())
+
     }
 
-    async createUser(user : any): Promise<any> {
+    async getUsers() : Promise<Array<IUserDTO>> {      
+        return await User.all()
+            .then((result : any) => {
+                this.status = 200
+                const pipe = new Array<IUserDTO>();
+                for (let user of result) pipe.push(new IUserDTO(user)) 
+                return pipe
+            })
+            .catch((err) => {
+                this.status = 300
+                return err
+            })
+            .finally(() => dataBase.close())
+    }
+
+    async createUser(user : any): Promise<Boolean> {
         const security = new UserTool(user)
         user.password = security.security
         user.secretKey = security.keySecurity
@@ -39,49 +56,62 @@ export class UserService {
                 return true
             })
             .catch(reason => {
+                console.warn(reason)
                 this.status = 400
                 return false
             })
+            .finally(() => dataBase.close())
+
     
     }
 
-    async logUser(log : ILog) : Promise<any> {
+    async logUser(log : ILog) : Promise<ILog> {
 
-        await User.select("password","secretKey").where("email", log?.email??"").get()
+        const security = new SecurityStorage();
+        await User.select("password","secretKey","id").where("email", log?.email??"").get()
             .then((result : any) => {
                 if (result.length) {
+                    this.log.id = result[0].id
                     this.log.email = log.email
+                    if (log.password === security.decrypt(result[0].password, result[0].secretKey)) this.log.password = true
+                    else this.log.password = false
+                } else {
+                    this.log.email = false
                     this.log.password = false
-                    if (log.password === new SecurityStorage().decrypt(result[0].password, result[0].secretKey)) this.log.password = true
-                    
-                    return
-                } else this.log.email = false
-            }).catch((err) => {
-                console.log(err)
-            });
-            
-
-
+                }
+            })
+            .catch((err) => {
+                console.warn(err)
+                return err
+            })
+            .finally(() => dataBase.close())
+            return this.log
     }
 
-    async updateUser(user : any): Promise<any> {
+    async updateUser(user : any): Promise<IUser> {
         return await User.where("id", user.id).update(user)
             .then((result) => {
                 this.status = 200;
                 return result;
-            }).catch((err) => {
+            })
+            .catch((err) => {
+                console.warn(err)
                 this.status = 400;
                 return err;
-            });
+            })
+            .finally(() => dataBase.close())
     }
 
-    async deleteUser(id : number | string): Promise<any> {
+    async deleteUser(id : number | string): Promise<Boolean> {
         return await User.deleteById(id)
-            .then((result) => {
-                return true
-            }).catch((err) => {
+            .then((result : any) => {
+                console.log(result)
+                return result.affectedRows ? true : false
+            })
+            .catch((err) => {
                 console.warn(err)
                 return false
-            });
+            })
+            .finally(() => dataBase.close())
     } 
 }
