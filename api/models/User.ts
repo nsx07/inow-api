@@ -1,5 +1,5 @@
 import { Model } from "https://deno.land/x/denodb@v1.2.0/mod.ts";
-import { SecurityStorage } from "../util/Security.ts"
+import { SecurityStorage } from "../util/SecurityPass.ts"
 
 export interface IUser {
     id : number,

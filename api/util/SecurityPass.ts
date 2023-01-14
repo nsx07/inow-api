@@ -1,6 +1,6 @@
 export class SecurityStorage {
 
-    private ASCII = `1234567890QWERTYUIOPASDFGHJKLÇZXCVBNMpoiuytrewqasdfghjklçmnbvcxz!@#$%&*()_`
+    private ASCII = `1234567890QWERTYUIOPÇZXCVBNMpoiuytrewqasdfghASDFGHJKLjklçmnbvcxz!@#$%&*()_`
     public key! : number;
 
 
