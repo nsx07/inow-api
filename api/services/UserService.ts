@@ -1,6 +1,6 @@
 import { Model } from 'https://deno.land/x/denodb@v1.2.0/mod.ts';
 import { SecurityStorage } from './../util/SecurityPass.ts';
-import { ILog, IUserDTO, UserTool } from './../models/User.ts';
+import { ILog, IUserDTO, LogOptions, UserTool } from './../models/User.ts';
 import { IUser } from "../models/User.ts";
 import { dataBase } from "./DatabaseService.ts";
 import { User } from "../models/Entities.ts";
@@ -8,7 +8,7 @@ import { User } from "../models/Entities.ts";
 export class UserService {
 
     status! : number;
-    log : ILog = {}
+    log : ILog = {inputType : LogOptions.EMAIL}
 
     constructor() {
         return this
@@ -66,17 +66,20 @@ export class UserService {
     }
 
     async logUser(log : ILog) : Promise<ILog> {
-
+        // console.log(LogOptions[log.inputType], log)
         const security = new SecurityStorage();
-        await User.select("password","secretKey","id").where("email", log?.email??"").get()
+        await User.select("password","secretKey","id").where(LogOptions[log.inputType].toLowerCase(), log?.input??"").get()
             .then((result : any) => {
                 if (result.length) {
                     this.log.id = result[0].id
-                    this.log.email = log.email
-                    if (log.password === security.decrypt(result[0].password, result[0].secretKey)) this.log.password = true
-                    else this.log.password = false
+                    this.log.input = log.input
+                    if (log.password === security.decrypt(result[0].password, result[0].secretKey)) {
+                        this.log.password = true
+                    } else {
+                        this.log.password = false
+                    } 
                 } else {
-                    this.log.email = false
+                    this.log.input = false
                     this.log.password = false
                 }
             })

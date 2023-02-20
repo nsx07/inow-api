@@ -57,9 +57,16 @@ export class IUserDTO extends Model implements IUserDTO{
 
 export interface ILog {
     id? : number | string,
-    email? : string | boolean,
+    input? : string | boolean,
+    inputType : LogOptions
     password? : string | boolean
 }
+
+export enum LogOptions {
+    "CPF" = 1,
+    "EMAIL" = 2,
+    "PHONE" = 3
+  }
 
 export class UserTool {
     
