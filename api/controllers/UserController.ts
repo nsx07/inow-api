@@ -13,6 +13,9 @@ const getUserById = async (context : RouterContext<"/api/v1/getUserById:id">) =>
 
 const getUsers = async (context : RouterContext<"/api/v1/getUsers">) => {
     let users = await userService.getUsers();
+
+    console.log("[LOG] -- GET USERS -- [LOG]")
+
     context.response.body = users;
     context.response.status = userService.status;
 }
@@ -20,6 +23,9 @@ const getUsers = async (context : RouterContext<"/api/v1/getUsers">) => {
 const createUser = async (context : RouterContext<"/api/v1/createUser">) => {    
     let userToInsert  : IUser = await context.request.body().value;
     let service = await userService.createUser(userToInsert);
+
+    console.log("[LOG] -- CREATING USER -- [LOG]")
+
     context.response.body = service;
     context.response.status = userService.status;
 }
