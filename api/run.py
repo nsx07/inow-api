@@ -1,5 +1,4 @@
 import os
-import pyautogui as pag
 
 COMMAND = {
     "run_watch" : "deno run --allow-net --allow-read --watch app.ts",
